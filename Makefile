@@ -1,6 +1,6 @@
 # VARIABLES
 TARG=sgs-enabler
-PACKAGE="github.com/sudokuDfs"
+PACKAGE="github.com/vivalapanda/sudokuDfs"
 BINARY_NAME="sudokuDfs"
 
 print_success = echo -e "\e[1;32m$(1) $<\e[0m"

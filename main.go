@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/sudokuDfs/hello"
+	sudobo "github.com/vivalapanda/sudokuDfs/sudokuboard"
 )
 
 func main() {
-	fmt.Println(hello.BuildHello())
+	sudobo.BuildSudokuBoard("testSudokuBoard.txt")
 }
