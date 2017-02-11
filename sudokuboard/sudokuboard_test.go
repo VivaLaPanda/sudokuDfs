@@ -1,17 +1,21 @@
 package sudokuboard
 
 import (
+	"reflect"
 	"testing"
 )
 
 func TestBuildSudokuBoard(t *testing.T) {
-	testBoard = BuildSudokuBoard()
+	testBoard := BuildSudokuBoard("testSudokuBoard.txt")
+
+	// Making example board
+
 	testBoardArray := [][]int{}
-	boardStruct.testBoardArray = append(boardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
+	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
 
 	actual := testBoard.boardArray
 	expected := testBoardArray
-	if expected != actual {
-		t.Errorf("Error occured while testing sayhello: '%s' != '%s'", expected, actual)
+	if !(reflect.DeepEqual(actual, expected)) {
+		t.Errorf("Error occured while testing BuildSudokuBoard: '%s' != '%s'", expected, actual)
 	}
 }
