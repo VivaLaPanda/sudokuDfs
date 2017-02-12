@@ -8,32 +8,38 @@ import (
 	"sync"
 
 	datastruct "github.com/hishboy/gocommons/lang"
+	"github.com/oleiade/lane"
 )
 
 type boardCell struct {
 	i        int
 	j        int
 	children []SudokuBoard
-	lock     *sync.Mutex
 }
 
 type SudokuBoard struct {
 	boardArray [][]int
-	freeCells  *datastruct.Stack
+	freeCells  []boardCell
 	lock       *sync.Mutex
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
 
 func BuildSudokuBoard(fileName string) *SudokuBoard {
 	file, err := os.Open(fileName) // just pass the file name
 	if err != nil {
-		fmt.Print(err)
+		check(err)
 	}
 	defer file.Close()
 
 	boardStruct := &SudokuBoard{}
 	// Convert our file to a 2D array of ints
 	boardStruct.lock = &sync.Mutex{} // A mutex in case of later parallel implementations
-	freeCells := datastruct.NewStack()
+	boardStruct.freeCells = []boardCell{}
 
 	scanner := bufio.NewScanner(file)
 	lineNumber := 0
@@ -43,25 +49,14 @@ func BuildSudokuBoard(fileName string) *SudokuBoard {
 		row := []int{}
 
 		// Iterate through characters
-		for column, r := range tempLine[:len(tempLine)] {
+		for _, r := range tempLine[:len(tempLine)] {
 			// Convert chracters to ints
 			tempInt, err := strconv.ParseInt(string(r), 10, 32)
 			if err != nil {
-				fmt.Print(err)
+				check(err)
 			}
 			var newCell int
 			newCell = int(tempInt)
-
-			if newCell == 0 {
-
-				cellStruct := &boardCell{
-					i:        lineNumber,
-					j:        column,
-					children: []SudokuBoard{},
-					lock:     &sync.Mutex{}}
-
-				freeCells.Push(cellStruct)
-			}
 
 			// Put int's into an slice
 			row = append(row, newCell)
@@ -72,21 +67,44 @@ func BuildSudokuBoard(fileName string) *SudokuBoard {
 	}
 
 	if err := scanner.Err(); err != nil {
-		fmt.Print(err)
+		check(err)
 	}
 
-	boardStruct.freeCells = freeCells
+	// Get all free spaces and add them to a queue
+	boardStruct.genFreeCells()
 
 	return boardStruct
 }
 
-// func fillBoardCell (row, column, value) *SudokuBoard {
-//
-// }
+// When called on a board will return the board made by
+// placing the value in the given row and column
+// Will not modify the board it is called on
+// WILL NOT preserve free cells, that should be handled before calling this function!
+func (board SudokuBoard) fillBoardCell(row int, column int, value int) *SudokuBoard {
+	// Deep copy board arra
+	newBoardArray := [][]int{}
+	for _, row := range board.boardArray {
+		tempRow := []int{}
+		for _, element := range row {
+			tempRow = append(tempRow, element)
+		}
+
+		newBoardArray = append(newBoardArray, tempRow)
+	}
+	board.boardArray = newBoardArray
+
+	if row > len(board.boardArray) || column > len(board.boardArray[0]) {
+		fmt.Errorf("Row or Column out of bounds. Row: %s ; Column: %s\n", row, column)
+	}
+
+	board.boardArray[row][column] = value
+
+	return &board
+}
 
 // Given a board determines if it is legal
 // It assumes onle the cell at row,column has changed
-func checkValidBoard(board *SudokuBoard, row int, column int) bool {
+func isValidBoard(board *SudokuBoard, row int, column int) bool {
 	rowHash := datastruct.NewHashSet()
 	columnHash := datastruct.NewHashSet()
 	boxHash := datastruct.NewHashSet()
@@ -129,27 +147,81 @@ func checkValidBoard(board *SudokuBoard, row int, column int) bool {
 	return true
 }
 
-func (board *SudokuBoard) GenChildren() {
-	// For every free cell on the sudokyu board
-	for i := 0; i < board.freeCells.Len(); i++ {
-		// Getting the cell from the stack and storing it
-		// Weird code to assert type in multiple assignment
-		// http://stackoverflow.com/questions/11403050/idiomatic-way-to-do-conversion-type-assertion-on-multiple-return-values-in-go
-		temp, err := board.freeCells.Get(i)
-		cell := temp.(boardCell)
-		if err != nil {
-			fmt.Print(err)
-		}
+func (board *SudokuBoard) genFreeCells() {
+	for i, row := range board.boardArray {
+		for j, element := range row {
+			if element == 0 {
+				cell := boardCell{
+					i: i,
+					j: j}
 
-		// Locking the cell for parallelisation
-		cell.lock.Lock()
-
-		// For every possible value in the cell, generate a board and test if it's valid
-		// If it's a valid board store it in the children of that cell
-		for cellValue := 1; cellValue < 10; cellValue++ {
-
+				board.lock.Lock()
+				board.freeCells = append(board.freeCells, cell)
+				board.lock.Unlock()
+			}
 		}
 	}
 
 	return
+}
+
+func (board *SudokuBoard) Children() *datastruct.Stack {
+	// For every free cell on the sudokyu board
+	childrenQueue := lane.NewPQueue(lane.MAXPQ)
+	childrenStack := datastruct.NewStack()
+
+	for i, cell := range board.freeCells {
+		tempBoardSlice := []*SudokuBoard{}
+
+		for cellValue := 1; cellValue < 10; cellValue++ {
+			tempChild := board.fillBoardCell(cell.i, cell.j, cellValue)
+			if isValidBoard(tempChild, cell.i, cell.j) {
+				// Remove the cell from this child's freeCells
+
+				tempChild.freeCells[len(tempChild.freeCells)-1], tempChild.freeCells[i] = tempChild.freeCells[i], tempChild.freeCells[len(tempChild.freeCells)-1]
+				tempChild.freeCells = tempChild.freeCells[:len(tempChild.freeCells)-1]
+
+				tempBoardSlice = append(tempBoardSlice, tempChild)
+			}
+		}
+
+		for _, childBoard := range tempBoardSlice {
+			childrenQueue.Push(childBoard, len(tempBoardSlice))
+		}
+	}
+
+	for !childrenQueue.Empty() {
+		temp, _ := childrenQueue.Pop()
+		boardToPush := temp.(*SudokuBoard)
+		childrenStack.Push(boardToPush)
+	}
+
+	return childrenStack
+}
+
+// Dumps the contents of a board to the provided file
+func (board *SudokuBoard) Dump(filename string) error {
+	// Open or create the file depending on whether it exists
+	var file *os.File
+	if _, err := os.Stat(filename); err == nil {
+		temp, err := os.Open(filename) // just pass the file name
+		file = temp
+		check(err)
+	} else {
+		temp, err := os.Create(filename) // just pass the file name
+		file = temp
+		check(err)
+	}
+	defer file.Close()
+
+	w := bufio.NewWriter(file)
+	for _, row := range board.boardArray {
+		for _, cellInt := range row {
+			fmt.Fprintf(w, "%s", strconv.Itoa(cellInt))
+		}
+
+		fmt.Fprint(w, "\n")
+	}
+
+	return w.Flush()
 }
