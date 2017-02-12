@@ -165,10 +165,14 @@ func (board *SudokuBoard) genFreeCells() {
 	return
 }
 
-func (board *SudokuBoard) Children() *datastruct.Stack {
+// Takes a board and returns a queue of it's children ordered by
+// Which ones came from cells with fewer children
+// Returns: PQueue of children, where higher priotity elemnts have more children
+// This is done so that when elements are pulled off and put on a stack the stack
+// is ordered from least node children to most children
+func (board *SudokuBoard) Children() *lane.PQueue {
 	// For every free cell on the sudokyu board
 	childrenQueue := lane.NewPQueue(lane.MAXPQ)
-	childrenStack := datastruct.NewStack()
 
 	for i, cell := range board.freeCells {
 		tempBoardSlice := []*SudokuBoard{}
@@ -190,13 +194,16 @@ func (board *SudokuBoard) Children() *datastruct.Stack {
 		}
 	}
 
-	for !childrenQueue.Empty() {
-		temp, _ := childrenQueue.Pop()
-		boardToPush := temp.(*SudokuBoard)
-		childrenStack.Push(boardToPush)
+	return childrenQueue
+}
+
+// Returns as bool indicating whether the given board is a goal.
+func (board *SudokuBoard) IsGoal() bool {
+	if len(board.freeCells) == 0 {
+		return true
 	}
 
-	return childrenStack
+	return false
 }
 
 // Dumps the contents of a board to the provided file

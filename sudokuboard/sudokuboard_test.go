@@ -6,21 +6,21 @@ import (
 )
 
 func TestBuildSudokuBoard(t *testing.T) {
-	testBoard := BuildSudokuBoard("testSudokuBoard.txt")
+	testBoard := BuildSudokuBoard("../testInputs/testSudokuBoard.txt")
 
 	// Making example board
 
 	testBoardArray := [][]int{}
 	// Board amde inline
-	testBoardArray = append(testBoardArray, []int{1, 0, 0, 0, 0, 0, 0, 0, 2})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 1})
+	testBoardArray = append(testBoardArray, []int{7, 0, 3, 0, 8, 0, 0, 4, 0})
+	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 9, 3, 5, 8})
+	testBoardArray = append(testBoardArray, []int{0, 0, 4, 3, 0, 0, 0, 6, 0})
+	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 3, 6, 0, 1})
+	testBoardArray = append(testBoardArray, []int{0, 3, 0, 0, 0, 0, 0, 8, 0})
+	testBoardArray = append(testBoardArray, []int{1, 0, 6, 5, 0, 0, 0, 0, 0})
+	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 2, 7, 0, 0})
+	testBoardArray = append(testBoardArray, []int{5, 4, 9, 6, 0, 0, 0, 0, 0})
+	testBoardArray = append(testBoardArray, []int{0, 7, 0, 0, 9, 0, 0, 0, 6})
 
 	actual := testBoard.boardArray
 	expected := testBoardArray
@@ -30,20 +30,20 @@ func TestBuildSudokuBoard(t *testing.T) {
 }
 
 func TestFillBoardCell(t *testing.T) {
-	originalBoard := BuildSudokuBoard("testSudokuBoard.txt")
+	originalBoard := BuildSudokuBoard("../testInputs/testSudokuBoard.txt")
 
-	testBoard := originalBoard.fillBoardCell(8, 0, 1)
+	testBoard := originalBoard.fillBoardCell(8, 0, 2)
 
 	testBoardArray := [][]int{}
-	testBoardArray = append(testBoardArray, []int{1, 0, 0, 0, 0, 0, 0, 0, 2})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 0, 0, 0, 0})
-	testBoardArray = append(testBoardArray, []int{1, 0, 0, 0, 0, 0, 0, 0, 1})
+	testBoardArray = append(testBoardArray, []int{7, 0, 3, 0, 8, 0, 0, 4, 0})
+	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 9, 3, 5, 8})
+	testBoardArray = append(testBoardArray, []int{0, 0, 4, 3, 0, 0, 0, 6, 0})
+	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 3, 6, 0, 1})
+	testBoardArray = append(testBoardArray, []int{0, 3, 0, 0, 0, 0, 0, 8, 0})
+	testBoardArray = append(testBoardArray, []int{1, 0, 6, 5, 0, 0, 0, 0, 0})
+	testBoardArray = append(testBoardArray, []int{0, 0, 0, 0, 0, 2, 7, 0, 0})
+	testBoardArray = append(testBoardArray, []int{5, 4, 9, 6, 0, 0, 0, 0, 0})
+	testBoardArray = append(testBoardArray, []int{2, 7, 0, 0, 9, 0, 0, 0, 6})
 
 	actual := testBoard.boardArray
 	expected := testBoardArray
@@ -58,7 +58,7 @@ func TestFillBoardCell(t *testing.T) {
 
 func TestIsValidBoard(t *testing.T) {
 	// Testing valid case
-	testBoard := BuildSudokuBoard("testSudokuBoard.txt")
+	testBoard := BuildSudokuBoard("../testInputs/testSudokuBoard.txt")
 
 	isValid := isValidBoard(testBoard, 0, 8)
 
@@ -69,9 +69,9 @@ func TestIsValidBoard(t *testing.T) {
 	}
 
 	// Testing invalid case
-	invalidBoard_1 := testBoard.fillBoardCell(1, 7, 2)
-	invalidBoard_2 := testBoard.fillBoardCell(0, 1, 1)
-	invalidBoard_3 := testBoard.fillBoardCell(1, 0, 1)
+	invalidBoard_1 := testBoard.fillBoardCell(1, 7, 3)
+	invalidBoard_2 := testBoard.fillBoardCell(0, 1, 3)
+	invalidBoard_3 := testBoard.fillBoardCell(1, 0, 5)
 
 	isValid_1 := isValidBoard(invalidBoard_1, 1, 7)
 	isValid_2 := isValidBoard(invalidBoard_2, 0, 1)
@@ -84,13 +84,13 @@ func TestIsValidBoard(t *testing.T) {
 }
 
 func TestChildren(t *testing.T) {
-	testBoard := BuildSudokuBoard("testSudokuBoard.txt")
+	testBoard := BuildSudokuBoard("../testInputs/testSudokuBoard.txt")
 	children := testBoard.Children()
 
 	// Comparing number of children, actually comparing the children would be
 	// VERY expensive
-	expected := 646
-	actual := children.Len()
+	expected := 184
+	actual := children.Size()
 
 	if actual != expected {
 		t.Errorf("Error occured while testing Children: '%s' != '%s'", expected, actual)
@@ -98,10 +98,10 @@ func TestChildren(t *testing.T) {
 }
 
 func TestDump(t *testing.T) {
-	testBoard := BuildSudokuBoard("testSudokuBoard.txt")
+	testBoard := BuildSudokuBoard("../testInputs/testSudokuBoard.txt")
 	testBoard.Dump("testDumpBoard.txt")
 
-	dumpedBoard := BuildSudokuBoard("testDumpBoard.txt")
+	dumpedBoard := BuildSudokuBoard("../testInputs/testDumpBoard.txt")
 
 	// Comparing number of children, actually comparing the children would be
 	// VERY expensive
@@ -110,5 +110,25 @@ func TestDump(t *testing.T) {
 
 	if !(reflect.DeepEqual(actual, expected)) {
 		t.Errorf("Error occured while testing Dump: '%s' != '%s'", expected, actual)
+	}
+}
+
+func TestIsGoal(t *testing.T) {
+	testBoard := BuildSudokuBoard("../testInputs/testSudokuBoard.txt")
+	actual := testBoard.IsGoal()
+
+	expected := false
+
+	if actual != expected {
+		t.Errorf("Error occured while testing IsGoal: '%s' != '%s'", expected, actual)
+	}
+
+	goalBoard := BuildSudokuBoard("../testInputs/testSudokuBoard_completed.txt")
+	actual = goalBoard.IsGoal()
+
+	expected = true
+
+	if actual != expected {
+		t.Errorf("Error occured while testing IsGoal: '%s' != '%s'", expected, actual)
 	}
 }
