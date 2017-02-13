@@ -18,6 +18,7 @@ func depthFirstSearch(board *sudobo.SudokuBoard) *sudobo.SudokuBoard {
 
 	children := board.Children()
 	fringe := ds.NewStack()
+	closed := ds.NewHashSet()
 
 	// Move elemnts from children into stack
 	for !children.Empty() {
@@ -30,18 +31,23 @@ func depthFirstSearch(board *sudobo.SudokuBoard) *sudobo.SudokuBoard {
 	// We keep searching until we hit the goal or we run out of nodes
 	temp := fringe.Pop()
 	currentNode := temp.(*sudobo.SudokuBoard)
-	for ; (fringe.Len() == 0) || currentNode.IsGoal(); currentNode = fringe.Pop().(*sudobo.SudokuBoard) {
-		nodesToPushQueue := currentNode.Children()
-		for !nodesToPushQueue.Empty() {
-			temp, _ := nodesToPushQueue.Pop()
-			boardToPush := temp.(*sudobo.SudokuBoard)
-			fringe.Push(boardToPush)
+	for ; (fringe.Len() > 0) && !currentNode.IsGoal(); currentNode = fringe.Pop().(*sudobo.SudokuBoard) {
+		// Checking to see if we have already expanded a node
+		boardString := currentNode.GetBoardString()
+		if !(closed.Contains(boardString)) {
+			closed.Add(boardString)
+
+			nodesToPushQueue := currentNode.Children()
+			for !nodesToPushQueue.Empty() {
+				temp, _ := nodesToPushQueue.Pop()
+				boardToPush := temp.(*sudobo.SudokuBoard)
+				fringe.Push(boardToPush)
+			}
 		}
 	}
 
 	// If we've exited the loop, we can assume that if we aren't at the goalBoard
 	// there is none
-	currentNode.Dump("test.txt")
 	if currentNode.IsGoal() {
 		return currentNode
 	} else {

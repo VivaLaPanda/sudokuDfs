@@ -81,7 +81,8 @@ func BuildSudokuBoard(fileName string) *SudokuBoard {
 // Will not modify the board it is called on
 // WILL NOT preserve free cells, that should be handled before calling this function!
 func (board SudokuBoard) fillBoardCell(row int, column int, value int) *SudokuBoard {
-	// Deep copy board arra
+	// A bunch of code to make sure this function doesn't modify board, but returns
+	// A new board with modified values
 	newBoardArray := [][]int{}
 	for _, row := range board.boardArray {
 		tempRow := []int{}
@@ -92,6 +93,11 @@ func (board SudokuBoard) fillBoardCell(row int, column int, value int) *SudokuBo
 		newBoardArray = append(newBoardArray, tempRow)
 	}
 	board.boardArray = newBoardArray
+
+	newFreeCells := make([]boardCell, len(board.freeCells))
+	copy(newFreeCells, board.freeCells)
+
+	board.freeCells = newFreeCells
 
 	if row > len(board.boardArray) || column > len(board.boardArray[0]) {
 		fmt.Errorf("Row or Column out of bounds. Row: %s ; Column: %s\n", row, column)
@@ -148,9 +154,11 @@ func isValidBoard(board *SudokuBoard, row int, column int) bool {
 }
 
 func (board *SudokuBoard) genFreeCells() {
+	it := 0
 	for i, row := range board.boardArray {
 		for j, element := range row {
 			if element == 0 {
+				it++
 				cell := boardCell{
 					i: i,
 					j: j}
@@ -181,7 +189,6 @@ func (board *SudokuBoard) Children() *lane.PQueue {
 			tempChild := board.fillBoardCell(cell.i, cell.j, cellValue)
 			if isValidBoard(tempChild, cell.i, cell.j) {
 				// Remove the cell from this child's freeCells
-
 				tempChild.freeCells[len(tempChild.freeCells)-1], tempChild.freeCells[i] = tempChild.freeCells[i], tempChild.freeCells[len(tempChild.freeCells)-1]
 				tempChild.freeCells = tempChild.freeCells[:len(tempChild.freeCells)-1]
 
@@ -206,19 +213,25 @@ func (board *SudokuBoard) IsGoal() bool {
 	return false
 }
 
+// Returns the the board array
+// Primarily so we can compare boards
+func (board *SudokuBoard) GetBoardString() string {
+	return fmt.Sprintf("%v", board.boardArray)
+}
+
 // Dumps the contents of a board to the provided file
 func (board *SudokuBoard) Dump(filename string) error {
 	// Open or create the file depending on whether it exists
 	var file *os.File
 	if _, err := os.Stat(filename); err == nil {
-		temp, err := os.Open(filename) // just pass the file name
-		file = temp
-		check(err)
-	} else {
-		temp, err := os.Create(filename) // just pass the file name
-		file = temp
+		err := os.Remove(filename) // just pass the file name
 		check(err)
 	}
+
+	temp, err := os.Create(filename) // just pass the file name
+	file = temp
+	check(err)
+
 	defer file.Close()
 
 	w := bufio.NewWriter(file)

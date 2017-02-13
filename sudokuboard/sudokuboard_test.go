@@ -86,14 +86,22 @@ func TestIsValidBoard(t *testing.T) {
 func TestChildren(t *testing.T) {
 	testBoard := BuildSudokuBoard("../testInputs/testSudokuBoard.txt")
 	children := testBoard.Children()
+	freeCells := len(testBoard.freeCells)
 
 	// Comparing number of children, actually comparing the children would be
 	// VERY expensive
-	expected := 184
-	actual := children.Size()
+	expectedChildren := 182
+	actualChildren := children.Size()
 
-	if actual != expected {
-		t.Errorf("Error occured while testing Children: '%s' != '%s'", expected, actual)
+	expectedFree := 53
+	actualFree := freeCells
+
+	if expectedChildren != actualChildren {
+		t.Errorf("Error occured while testing Children: '%s' != '%s'", expectedChildren, actualChildren)
+	}
+
+	if expectedFree != actualFree {
+		t.Errorf("Error occured while testing Free Cells: '%s' != '%s'", expectedFree, actualFree)
 	}
 }
 
